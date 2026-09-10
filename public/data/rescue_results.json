@@ -1,0 +1,159 @@
+{
+  "drones": [
+    {
+      "id": 1,
+      "name": "DRONE-01",
+      "x": 933.6,
+      "y": 972.4,
+      "altitude": 100,
+      "speed": 10,
+      "battery": 83.8,
+      "available": true,
+      "status": "SEARCHING"
+    },
+    {
+      "id": 2,
+      "name": "DRONE-02",
+      "x": -505,
+      "y": 1462,
+      "altitude": 100,
+      "speed": 12,
+      "battery": 79.3,
+      "available": true,
+      "status": "SEARCHING"
+    },
+    {
+      "id": 3,
+      "name": "DRONE-03",
+      "x": 1447,
+      "y": -520,
+      "altitude": 100,
+      "speed": 11,
+      "battery": 74.3,
+      "available": true,
+      "status": "SEARCHING"
+    },
+    {
+      "id": 4,
+      "name": "DRONE-04",
+      "x": 285.7,
+      "y": 429.9,
+      "altitude": 100,
+      "speed": 10,
+      "battery": 88.8,
+      "available": true,
+      "status": "ASSIGNED"
+    },
+    {
+      "id": 5,
+      "name": "DRONE-05",
+      "x": 638,
+      "y": 1195,
+      "altitude": 100,
+      "speed": 13,
+      "battery": 69.3,
+      "available": true,
+      "status": "SEARCHING"
+    }
+  ],
+  "victims": [
+    {
+      "id": 1,
+      "name": "V-1",
+      "x": 650,
+      "y": 750,
+      "priority": "HIGH",
+      "status": "RESCUED",
+      "assignedDrone": 1
+    },
+    {
+      "id": 2,
+      "name": "V-2",
+      "x": 250,
+      "y": 450,
+      "priority": "MEDIUM",
+      "status": "RESCUED",
+      "assignedDrone": 4
+    },
+    {
+      "id": 3,
+      "name": "V-3",
+      "x": 800,
+      "y": 250,
+      "priority": "LOW",
+      "status": "ASSIGNED",
+      "assignedDrone": 4
+    }
+  ],
+  "rescue": {
+    "target_victim": 3,
+    "priority": "LOW",
+    "assigned_drone": 4,
+    "distance": 544.82,
+    "battery": 88.8
+  },
+  "decision_support": {
+    "selected_drone_id": 4,
+    "target_victim_id": 3,
+    "recommendation": "DRONE-04 selected for V-3: LOW priority + est. response time 54s + battery 88.8% (AI Score: 0.84)",
+    "scores": [
+      0.8,
+      0.651,
+      0.744,
+      0.839,
+      0.759
+    ],
+    "estimated_arrival_sec": 54,
+    "road_blocked": false,
+    "selected_ground_route": "fastest",
+    "step": 57,
+    "timestamp": "12:37:35 pm"
+  },
+  "mission": {
+    "id": "M-003",
+    "status": "ASSIGNED",
+    "targetVictim": 3,
+    "assignedDrone": 4,
+    "estTime": "54 sec",
+    "distance": "544.8 m"
+  },
+  "routes": {
+    "selected": "fastest",
+    "road_blocked": false,
+    "shortest_distance": "1.8 km",
+    "shortest_time": "8 min",
+    "fastest_distance": "2.4 km",
+    "fastest_time": "6 min",
+    "alternative_distance": "3.1 km",
+    "alternative_time": "11 min"
+  },
+  "analytics": {
+    "rescued_count": 2,
+    "active_missions": 1,
+    "avg_response_time": "54 sec",
+    "success_rate": "98%"
+  },
+  "road_blocked": false,
+  "alerts": [
+    {
+      "type": "HIGH",
+      "title": "HIGH PRIORITY VICTIM DETECTED",
+      "message": "Victim V-3 located at (800, 250). Immediate response initiated.",
+      "time": "Just now"
+    },
+    {
+      "type": "INFO",
+      "title": "DRONE-04 ASSIGNED",
+      "message": "DRONE-04 navigating to Victim V-3. Distance: 544.8m.",
+      "time": "Live"
+    },
+    {
+      "type": "INFO",
+      "title": "ROAD CONDITION MONITORED",
+      "message": "Ground rescue routes are clear and accessible.",
+      "time": "1 min ago"
+    }
+  ],
+  "simulation_step": 57,
+  "timestamp": "12:37:35 pm"
+}
