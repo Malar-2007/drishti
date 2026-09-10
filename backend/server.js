@@ -198,9 +198,17 @@ if (fs.existsSync(dataDir)) {
   });
 }
 
-server.listen(PORT, () => {
+app.get('/', (req, res) => {
+  res.json({
+    status: 'online',
+    system: 'DRISHTI SIH Backend',
+    message: 'Backend is running successfully'
+  });
+});
+
+server.listen(PORT, '0.0.0.0', () => {
   console.log('===========================================================');
-  console.log(`  DRISHTI SIH BACKEND ACTIVE ON http://localhost:${PORT}   `);
-  console.log(`  WebSocket Server ready on ws://localhost:${PORT}          `);
+  console.log(`  DRISHTI SIH BACKEND ACTIVE ON PORT ${PORT}`);
+  console.log(`  WebSocket Server ready on PORT ${PORT}`);
   console.log('===========================================================');
 });
