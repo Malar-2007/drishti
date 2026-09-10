@@ -1,33 +1,75 @@
-import { drones as defaultDrones, victims as defaultVictims, rescue as defaultRescue } from "./simulationData";
+import {
+  drones as defaultDrones,
+  victims as defaultVictims,
+  rescue as defaultRescue
+} from "./simulationData";
 
 let lastValidData = null;
 
 export async function getSimulationData() {
   try {
+    const apiUrl = import.meta.env.VITE_API_URL;
+
+    if (apiUrl) {
+      const response = await fetch(
+        `${apiUrl}/api/simulation-data?timestamp=${new Date().getTime()}`,
+        { cache: "no-store" }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+
+        if (
+          data &&
+          Array.isArray(data.drones) &&
+          data.drones.length > 0 &&
+          Array.isArray(data.victims) &&
+          data.rescue
+        ) {
+          lastValidData = {
+            ...data,
+            isLive: true,
+            lastFetchSuccess: Date.now()
+          };
+
+          return lastValidData;
+        }
+      }
+    }
+
     const response = await fetch(
       `/data/rescue_results.json?timestamp=${new Date().getTime()}`,
       { cache: "no-store" }
     );
 
     if (!response.ok) {
-      throw new Error(`HTTP error ${response.status}: Failed to load simulation data`);
+      throw new Error(`HTTP error ${response.status}`);
     }
 
     const data = await response.json();
 
-    // Basic structure validation to guard against half-written files
-    if (data && Array.isArray(data.drones) && data.drones.length > 0 && Array.isArray(data.victims) && data.rescue) {
+    if (
+      data &&
+      Array.isArray(data.drones) &&
+      data.drones.length > 0 &&
+      Array.isArray(data.victims) &&
+      data.rescue
+    ) {
       lastValidData = {
         ...data,
         isLive: true,
         lastFetchSuccess: Date.now()
       };
+
       return lastValidData;
-    } else {
-      throw new Error("Simulation JSON payload was incomplete or malformed");
     }
+
+    throw new Error("Simulation JSON payload was incomplete");
   } catch (error) {
-    console.warn("Simulation API read warning (retaining cached data):", error.message);
+    console.warn(
+      "Simulation API read warning (retaining cached data):",
+      error.message
+    );
 
     if (lastValidData) {
       return {
@@ -37,7 +79,6 @@ export async function getSimulationData() {
       };
     }
 
-    // Initial fallback if file has not yet been fetched
     return {
       drones: defaultDrones,
       victims: defaultVictims,
@@ -51,7 +92,8 @@ export async function getSimulationData() {
       decision_support: {
         selected_drone_id: 1,
         target_victim_id: 1,
-        recommendation: "DRONE-01 assigned to V-1: HIGH priority + shortest response time.",
+        recommendation:
+          "DRONE-01 assigned to V-1: HIGH priority + shortest response time.",
         scores: [0.9, 0.75, 0.7, 0.8, 0.78],
         estimated_arrival_sec: 7,
         road_blocked: false,

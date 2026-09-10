@@ -11,7 +11,11 @@
 class WebSocketService {
   constructor() {
     this.ws = null;
-    this.url = "ws://localhost:5000";
+    this.url =
+  import.meta.env.VITE_WS_URL ||
+  (window.location.protocol === "https:"
+    ? "wss://localhost:5000"
+    : "ws://localhost:5000");
     this.reconnectAttempts = 0;
     this.maxReconnectDelay = 8000;
     this.reconnectTimer = null;
