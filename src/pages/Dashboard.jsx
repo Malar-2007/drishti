@@ -27,6 +27,7 @@ import AnalyticsPanel from "../components/AnalyticsPanel";
 import YoloDetectionCard from "../components/YoloDetectionCard";
 import VictimIntelligenceCard from "../components/VictimIntelligenceCard";
 import EventFeed from "../components/EventFeed";
+import ConnectDronePanel from "../components/ConnectDronePanel";
 import { ConnectionBadge } from "../App";
 
 import { getSimulationData } from "../data/simulationAPI";
@@ -37,6 +38,8 @@ function Dashboard({
   simulationData: propSimulationData = null,
   connectionStatus = "websocket"
 }) {
+  const [operationMode, setOperationMode] = useState("simulation"); // 'simulation' | 'real_drone'
+  const [realDroneTelemetry, setRealDroneTelemetry] = useState(null);
   const [internalData, setInternalData] = useState(null);
   const [selectedRoute, setSelectedRoute] = useState("fastest");
   const [roadBlocked, setRoadBlocked] = useState(false);
@@ -103,7 +106,26 @@ function Dashboard({
 
   const simulationData = propSimulationData || internalData || fallbackData;
 
-  const drones = Array.isArray(simulationData.drones) ? simulationData.drones : [];
+  const baseDrones = Array.isArray(simulationData.drones) ? simulationData.drones : [];
+  const drones = operationMode === "real_drone" && realDroneTelemetry
+    ? [
+        {
+          id: 1,
+          name: realDroneTelemetry.droneId || "DRONE-01",
+          x: 700 + Math.round(((realDroneTelemetry.latitude || 13.0827) - 13.0827) * 20000),
+          y: 700 + Math.round(((realDroneTelemetry.longitude || 80.2707) - 80.2707) * 20000),
+          altitude: realDroneTelemetry.altitude || 100,
+          speed: realDroneTelemetry.speed || 12,
+          battery: realDroneTelemetry.battery ?? 78,
+          available: true,
+          status: realDroneTelemetry.armed ? "ARMED (LIVE)" : "GATEWAY CONNECTED",
+          flightMode: realDroneTelemetry.flightMode || "GUIDED",
+          isRealHardware: true
+        },
+        ...baseDrones.slice(1)
+      ]
+    : baseDrones;
+
   const victims = Array.isArray(simulationData.victims) ? simulationData.victims : [];
 
   const rescue = {
@@ -263,7 +285,7 @@ function Dashboard({
         </div>
       )}
 
-      {/* PAGE HEADER WITH DYNAMIC SIH CONNECTION BADGE */}
+      {/* PAGE HEADER WITH DYNAMIC SIH CONNECTION BADGE & MODE SELECTOR */}
       <div className="page-header">
         <div>
           <h1>Emergency Dashboard</h1>
@@ -273,6 +295,55 @@ function Dashboard({
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+          {/* OPERATION MODE SELECTOR (SIMULATION vs REAL DRONE) */}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              background: "#0b1120",
+              padding: "3px",
+              borderRadius: "8px",
+              border: "1px solid #1f2937"
+            }}
+          >
+            <button
+              onClick={() => setOperationMode("simulation")}
+              style={{
+                padding: "6px 14px",
+                fontSize: "12px",
+                fontWeight: 700,
+                borderRadius: "6px",
+                border: "none",
+                cursor: "pointer",
+                background: operationMode === "simulation" ? "#2563eb" : "transparent",
+                color: operationMode === "simulation" ? "#ffffff" : "#94a3b8",
+                transition: "all 0.2s ease"
+              }}
+            >
+              SIMULATION MODE
+            </button>
+            <button
+              onClick={() => setOperationMode("real_drone")}
+              style={{
+                padding: "6px 14px",
+                fontSize: "12px",
+                fontWeight: 700,
+                borderRadius: "6px",
+                border: "none",
+                cursor: "pointer",
+                background: operationMode === "real_drone" ? "#059669" : "transparent",
+                color: operationMode === "real_drone" ? "#ffffff" : "#94a3b8",
+                transition: "all 0.2s ease",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px"
+              }}
+            >
+              <Radio size={14} />
+              REAL DRONE MODE
+            </button>
+          </div>
+
           <button
             onClick={() => setShowDemoGuide(!showDemoGuide)}
             style={{
@@ -300,6 +371,38 @@ function Dashboard({
           </div>
         </div>
       </div>
+
+      {operationMode === "real_drone" ? (
+        <div className="real-drone-dashboard">
+          {/* REAL DRONE GATEWAY PANEL */}
+          <div style={{ marginBottom: "24px" }}>
+            <ConnectDronePanel
+              onTelemetryUpdate={(data) => setRealDroneTelemetry(data)}
+            />
+          </div>
+
+          {/* EXISTING LIVE MAP */}
+          <LiveMap
+            drones={drones}
+            victims={victims}
+            selectedRoute={selectedRoute}
+            roadBlocked={roadBlocked}
+            assignedDroneId={rescue.assignedDrone}
+            targetVictimId={rescue.targetVictim}
+            mapLayers={mapLayers}
+          />
+
+          {/* EXISTING EVENT FEED & ALERTS */}
+          <div className="content-grid" style={{ marginTop: "20px" }}>
+            <AlertsPanel
+              roadBlocked={roadBlocked}
+              alerts={simulationData.alerts}
+            />
+            <EventFeed simulationData={simulationData} />
+          </div>
+        </div>
+      ) : (
+        <div className="simulation-dashboard">
 
       {/* SIH JUDGE INTERACTIVE 12-STEP DEMONSTRATION PANEL */}
       {showDemoGuide && (
@@ -732,7 +835,8 @@ function Dashboard({
         victims={victims}
         simulationData={simulationData}
       />
-
+        </div>
+      )}
     </div>
   );
 }

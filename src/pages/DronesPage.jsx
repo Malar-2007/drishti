@@ -8,11 +8,14 @@ import {
   MapPin,
   Target,
   ShieldCheck,
-  AlertTriangle
+  AlertTriangle,
+  Cpu
 } from "lucide-react";
+import ConnectDronePanel from "../components/ConnectDronePanel";
 
 function DronesPage({ drones = [], rescue = {}, simulationData = {} }) {
   const [selectedDroneId, setSelectedDroneId] = useState(drones[0]?.id || 1);
+  const [activeView, setActiveView] = useState("fleet"); // 'fleet' | 'gateway'
 
   const selectedDrone = drones.find((d) => d.id === selectedDroneId) || drones[0] || {};
   const isAssigned = selectedDrone.id === rescue.assigned_drone;
@@ -49,13 +52,59 @@ function DronesPage({ drones = [], rescue = {}, simulationData = {} }) {
           <h1>Drone Fleet Operations</h1>
           <p>Real-time telemetry, battery health, and autonomous search operations</p>
         </div>
-        <div className="live-status">
-          <span></span> FLEET ACTIVE ({drones.length} UNITS)
+        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          {/* VIEW SWITCHER: VIRTUAL FLEET vs HARDWARE GATEWAY */}
+          <div style={{ display: "flex", alignItems: "center", background: "#0b1120", padding: "3px", borderRadius: "8px", border: "1px solid #1f2937" }}>
+            <button
+              onClick={() => setActiveView("fleet")}
+              style={{
+                padding: "6px 12px",
+                fontSize: "12px",
+                fontWeight: 700,
+                borderRadius: "6px",
+                border: "none",
+                cursor: "pointer",
+                background: activeView === "fleet" ? "#2563eb" : "transparent",
+                color: activeView === "fleet" ? "#ffffff" : "#94a3b8",
+                transition: "all 0.2s ease"
+              }}
+            >
+              VIRTUAL FLEET (MATLAB)
+            </button>
+            <button
+              onClick={() => setActiveView("gateway")}
+              style={{
+                padding: "6px 12px",
+                fontSize: "12px",
+                fontWeight: 700,
+                borderRadius: "6px",
+                border: "none",
+                cursor: "pointer",
+                background: activeView === "gateway" ? "#059669" : "transparent",
+                color: activeView === "gateway" ? "#ffffff" : "#94a3b8",
+                transition: "all 0.2s ease",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px"
+              }}
+            >
+              <Radio size={14} />
+              HARDWARE GATEWAY (JETSON)
+            </button>
+          </div>
+
+          <div className="live-status">
+            <span></span> FLEET ACTIVE ({drones.length} UNITS)
+          </div>
         </div>
       </div>
 
-      {/* DRONE OVERVIEW STATS */}
-      <div className="stats-grid">
+      {activeView === "gateway" ? (
+        <ConnectDronePanel />
+      ) : (
+        <>
+          {/* DRONE OVERVIEW STATS */}
+          <div className="stats-grid">
         <div className="stat-card">
           <div className="stat-icon">
             <Plane />
@@ -248,8 +297,10 @@ function DronesPage({ drones = [], rescue = {}, simulationData = {} }) {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </>
+  )}
+</div>
+);
 }
 
 export default DronesPage;

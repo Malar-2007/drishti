@@ -13,17 +13,27 @@ class WebSocketService {
     this.ws = null;
     this.url =
   import.meta.env.VITE_WS_URL ||
-  (window.location.protocol === "https:"
-    ? "wss://localhost:5000"
-    : "ws://localhost:5000");
+  "wss://drishti-dg9e.onrender.com";
     this.reconnectAttempts = 0;
     this.maxReconnectDelay = 8000;
     this.reconnectTimer = null;
     this.pingTimer = null;
     this.onData = null;
     this.onStatus = null;
+    this.droneTelemetryListeners = new Set();
+    this.droneGatewayListeners = new Set();
     this.isEnabled = true;
     this.status = "connecting"; // 'websocket' | 'connecting' | 'polling' | 'offline'
+  }
+
+  onDroneTelemetry(callback) {
+    this.droneTelemetryListeners.add(callback);
+    return () => this.droneTelemetryListeners.delete(callback);
+  }
+
+  onDroneGatewayStatus(callback) {
+    this.droneGatewayListeners.add(callback);
+    return () => this.droneGatewayListeners.delete(callback);
   }
 
   connect(onData, onStatus) {
@@ -67,6 +77,14 @@ class WebSocketService {
             if (this.onData && payload.data) {
               this.onData(payload.data);
             }
+          } else if (payload.type === "DRONE_TELEMETRY") {
+            this.droneTelemetryListeners.forEach((cb) => {
+              try { cb(payload.data); } catch (err) { console.error(err); }
+            });
+          } else if (payload.type === "DRONE_GATEWAY_STATUS") {
+            this.droneGatewayListeners.forEach((cb) => {
+              try { cb(payload.data); } catch (err) { console.error(err); }
+            });
           }
         } catch (err) {
           console.warn("[DRISHTI WS Client] Error parsing incoming WebSocket message:", err);

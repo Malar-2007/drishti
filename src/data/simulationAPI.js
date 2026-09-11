@@ -11,10 +11,15 @@ export async function getSimulationData() {
     const apiUrl = import.meta.env.VITE_API_URL;
 
     if (apiUrl) {
-      const response = await fetch(
-        `${apiUrl}/api/simulation-data?timestamp=${new Date().getTime()}`,
-        { cache: "no-store" }
-      );
+      const apiUrl =
+  import.meta.env.VITE_API_URL ||
+  "https://drishti-dg9e.onrender.com";
+
+const response = await fetch(
+  `${apiUrl}/api/simulation-data?timestamp=${new Date().getTime()}`,
+  { cache: "no-store" }
+);
+      
 
       if (response.ok) {
         const data = await response.json();
